@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   db:
@@ -10,14 +10,16 @@ services:
       - MYSQL_DATABASE=wordpress
     volumes:
       - .docker/mysql:/var/lib/mysql
-    command: '--default-authentication-plugin=mysql_native_password'
+    command: "--default-authentication-plugin=mysql_native_password"
     networks:
       - app-network
 
   wordpress:
     depends_on:
       - db
-    image: wordpress:5.1.1-fpm-alpine
+    build:
+      context: ./php
+      dockerfile: Dockerfile
     container_name: wordpress
     restart: unless-stopped
     env_file: .env
@@ -46,6 +48,17 @@ services:
     networks:
       - app-network
 
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin:5.2.1-apache
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+
   certbot:
     depends_on:
       - webserver
@@ -58,4 +71,4 @@ services:
 
 networks:
   app-network:
-    driver: bridge  
+    driver: bridge
